@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observer;
 
+import marvin.image.MarvinImage;
+import marvin.plugin.MarvinImagePlugin;
+import marvin.util.MarvinPluginLoader;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +38,8 @@ public class SensorArduino extends Arduino implements Runnable {
 	@Override
 	public void run() {
 		connect();
+		
+		MarvinImagePlugin imagePlugin = MarvinPluginLoader.loadImagePlugin("org.marvinproject.image.transform.scale.jar");
 		
 		try {
 			//int[][] multi = new int[WIDTH][HEIGHT];
@@ -69,9 +75,16 @@ public class SensorArduino extends Arduino implements Runnable {
 				}
 				
 				BufferedImage image = getImageFromArray(pixels, WIDTH, HEIGHT);
+				//image = getScaledImage(image, 500, 500);
+				
+				MarvinImage marvinImage = new MarvinImage(image);
+				
+				imagePlugin.setAttribute("newWidth", 200);
+				imagePlugin.setAttribute("height", 200);
+				imagePlugin.process(marvinImage, marvinImage);
 				
 				this.setChanged();
-				this.notifyObservers(image);
+				this.notifyObservers(marvinImage.getNewImageInstance());
 				
 				
 				// if (split.length < 2) {
@@ -100,7 +113,7 @@ public class SensorArduino extends Arduino implements Runnable {
         image.getRaster().setPixels(0,0,width,height,pixels);
         //WritableRaster raster = (WritableRaster) image.getData();
         //raster.setPixels(0,0,width,height,pixels);
-        return getScaledImage(image, 500, 500);
+        return image;
     }
 	
 	public static BufferedImage getScaledImage(BufferedImage image, int width, int height) throws IOException {
