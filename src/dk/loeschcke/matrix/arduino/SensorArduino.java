@@ -12,6 +12,7 @@ import java.util.Observer;
 
 import marvin.image.MarvinImage;
 import marvin.plugin.MarvinImagePlugin;
+import marvin.util.MarvinAttributes;
 import marvin.util.MarvinPluginLoader;
 
 import org.slf4j.Logger;
@@ -79,12 +80,15 @@ public class SensorArduino extends Arduino implements Runnable {
 				
 				MarvinImage marvinImage = new MarvinImage(image);
 				
-				imagePlugin.setAttribute("newWidth", 200);
-				imagePlugin.setAttribute("height", 200);
-				imagePlugin.process(marvinImage, marvinImage);
+				imagePlugin.setAttribute("newWidth", 14);
+				imagePlugin.setAttribute("newHeight", 14);
+//				imagePlugin.process(marvinImage, marvinImage);
+				
+				MarvinImage clone = marvinImage.clone();
+				imagePlugin.process(marvinImage, clone);
 				
 				this.setChanged();
-				this.notifyObservers(marvinImage.getNewImageInstance());
+				this.notifyObservers(clone);
 				
 				
 				// if (split.length < 2) {
