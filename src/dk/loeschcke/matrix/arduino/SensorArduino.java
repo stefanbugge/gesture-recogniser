@@ -74,21 +74,21 @@ public class SensorArduino extends Arduino implements Runnable {
 //					}
 //					System.out.println(s);
 				}
-				
-				BufferedImage image = getImageFromArray(pixels, WIDTH, HEIGHT);
-				//image = getScaledImage(image, 500, 500);
+				int[] scaledPixels = resizeBilinearGray(pixels, WIDTH, HEIGHT,WIDTH*5,HEIGHT*5 );
+				BufferedImage image = getImageFromArray(scaledPixels, WIDTH*5, HEIGHT*5);
+				image = getScaledImage(image, 500, 500);
 				
 				MarvinImage marvinImage = new MarvinImage(image);
 				
-				imagePlugin.setAttribute("newWidth", 14);
-				imagePlugin.setAttribute("newHeight", 14);
+//				imagePlugin.setAttribute("newWidth", 150);
+//				imagePlugin.setAttribute("newHeight", 150);
 //				imagePlugin.process(marvinImage, marvinImage);
 				
-				MarvinImage clone = marvinImage.clone();
-				imagePlugin.process(marvinImage, clone);
+//				MarvinImage clone = marvinImage.clone();
+//				imagePlugin.process(marvinImage, clone);
 				
 				this.setChanged();
-				this.notifyObservers(clone);
+				this.notifyObservers(marvinImage);
 				
 				
 				// if (split.length < 2) {
@@ -133,4 +133,38 @@ public class SensorArduino extends Arduino implements Runnable {
 	        image,
 	        new BufferedImage(width, height, image.getType()));
 	}
+	
+	public int[] resizeBilinearGray(int[] pixels, int w, int h, int w2, int h2) {
+	    int[] temp = new int[w2*h2] ;
+	    int A, B, C, D, x, y, index, gray ;
+	    float x_ratio = ((float)(w-1))/w2 ;
+	    float y_ratio = ((float)(h-1))/h2 ;
+	    float x_diff, y_diff, ya, yb ;
+	    int offset = 0 ;
+	    for (int i=0;i<h2;i++) {
+	        for (int j=0;j<w2;j++) {
+	            x = (int)(x_ratio * j) ;
+	            y = (int)(y_ratio * i) ;
+	            x_diff = (x_ratio * j) - x ;
+	            y_diff = (y_ratio * i) - y ;
+	            index = y*w+x ;
+
+	            // range is 0 to 255 thus bitwise AND with 0xff
+	            A = pixels[index] & 0xff ;
+	            B = pixels[index+1] & 0xff ;
+	            C = pixels[index+w] & 0xff ;
+	            D = pixels[index+w+1] & 0xff ;
+	            
+	            // Y = A(1-w)(1-h) + B(w)(1-h) + C(h)(1-w) + Dwh
+	            gray = (int)(
+	                    A*(1-x_diff)*(1-y_diff) +  B*(x_diff)*(1-y_diff) +
+	                    C*(y_diff)*(1-x_diff)   +  D*(x_diff*y_diff)
+	                    ) ;
+
+	            temp[offset++] = gray ;                                   
+	        }
+	    }
+	    return temp ;
+	}
+	
 }
