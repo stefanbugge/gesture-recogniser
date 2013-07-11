@@ -23,8 +23,11 @@ import org.slf4j.LoggerFactory;
 import dk.loeschcke.matrix.arduino.SensorArduino;
 import dk.loeschcke.matrix.gui.ImagePanel;
 import dk.loeschcke.matrix.gui.MatrixFrame;
+import dk.loeschcke.matrix.image.CustomScaleStrategy;
 
 public class Main extends JFrame implements Observer {
+
+	private static final long serialVersionUID = 1L;
 
 	private static final Logger log = LoggerFactory.getLogger(Main.class);
 	
@@ -46,7 +49,7 @@ public class Main extends JFrame implements Observer {
 		
 		final ExecutorService threadPool = Executors.newCachedThreadPool();
 		
-		final SensorArduino sensorArduino = new SensorArduino("COM9");
+		final SensorArduino sensorArduino = new SensorArduino("COM6", new CustomScaleStrategy());
 		
 		threadPool.execute(sensorArduino);
 		

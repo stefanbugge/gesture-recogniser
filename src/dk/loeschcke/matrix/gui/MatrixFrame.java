@@ -8,6 +8,10 @@ import javax.swing.JPanel;
 
 public class MatrixFrame extends JFrame implements Observer {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JPanel panel;
 
 	public MatrixFrame(String name, JPanel panel) {
