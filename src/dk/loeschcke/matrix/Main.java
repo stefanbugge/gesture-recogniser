@@ -1,6 +1,10 @@
 package dk.loeschcke.matrix;
 
 
+import gesturefun.PointR;
+
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,27 +25,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.loeschcke.matrix.arduino.SensorArduino;
-import dk.loeschcke.matrix.gui.ImagePanel;
-import dk.loeschcke.matrix.gui.MatrixFrame;
 import dk.loeschcke.matrix.image.CustomScaleStrategy;
+import dk.loeschcke.matrix.util.FrameListener;
+import dk.loeschcke.matrix.util.PostRawPanel;
+import dk.loeschcke.matrix.util.PreRawPanel;
+import dk.loeschcke.matrix.util.PreSmoothedPanel;
+import dk.loeschcke.matrix.utilu.PostGesturePanel;
 
-public class Main extends JFrame implements Observer {
+public class Main extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger log = LoggerFactory.getLogger(Main.class);
 	
-	private MarvinImage image;
-	private MarvinImagePanel panel;
+	private static final int PANEL_SIZE = 400;
 	
 	public Main(String name) {
 		super(name);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setLayout(new BoxLayout(getContentPane(), BoxLayout.LINE_AXIS));
-		panel = new MarvinImagePanel();
-		add(panel);
+		setLayout(new GridLayout(2, 2, 10, 10));
 		setVisible(true);
-		setSize(600,600);
+		setSize(900, 900);
 	}
 	
 	public static void main(String... args) throws IOException {
@@ -49,7 +53,7 @@ public class Main extends JFrame implements Observer {
 		
 		final ExecutorService threadPool = Executors.newCachedThreadPool();
 		
-		final SensorArduino sensorArduino = new SensorArduino("COM6", new CustomScaleStrategy());
+		final SensorArduino sensorArduino = new SensorArduino("COM6");
 		
 		threadPool.execute(sensorArduino);
 		
@@ -60,9 +64,20 @@ public class Main extends JFrame implements Observer {
 				
 				Main main = new Main("Matrix");
 				
-				sensorArduino.addObserver(main);
+				FrameListener preRawPanel = new PreRawPanel(PANEL_SIZE, PANEL_SIZE);
+				FrameListener preSmoothedPanel = new PreSmoothedPanel(PANEL_SIZE, PANEL_SIZE, new CustomScaleStrategy());
+				FrameListener postRawPanel = new PostRawPanel(PANEL_SIZE, PANEL_SIZE);
+				FrameListener postGesturePanel = new PostGesturePanel(PANEL_SIZE, PANEL_SIZE);
 				
+				main.add((JPanel) preRawPanel);
+				main.add((JPanel) preSmoothedPanel);
+				main.add((JPanel) postRawPanel);
+				main.add((JPanel) postGesturePanel);
 				
+				sensorArduino.addListener(preRawPanel);
+				sensorArduino.addListener(preSmoothedPanel);
+				sensorArduino.addListener(postRawPanel);
+				sensorArduino.addListener(postGesturePanel);
 			}
 			
 		});
@@ -85,10 +100,4 @@ public class Main extends JFrame implements Observer {
 		System.exit(0);
 	}
 
-	@Override
-	public void update(Observable o, Object arg) {
-		image = (MarvinImage) arg;
-		image.update();
-		panel.setImage(image);
-	}
 }

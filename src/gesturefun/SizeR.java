@@ -1,4 +1,4 @@
-package dk.loeschcke.matrix.image;
+package gesturefun;
 /*
  *  The $N Multistroke Recognizer (Java version)
  *
@@ -63,48 +63,49 @@ package dk.loeschcke.matrix.image;
  * SUCH DAMAGE.
  */
 
-public class PointR {
-	public double X, Y;
-	public int T;
+public class SizeR {
+	private double _cx;
+	private double _cy;
 
-	public PointR() {
-		X = 0;
-		Y = 0;
-		T = 0;
+	public SizeR() {
 	}
 
-	public PointR(double x, double y) {
-		X = x;
-		Y = y;
-		T = 0;
-	}
-
-	public PointR(double x, double y, int t) {
-		X = x;
-		Y = y;
-		T = t;
+	public SizeR(double cx, double cy) {
+		_cx = cx;
+		_cy = cy;
 	}
 
 	// copy constructor
-	public PointR(PointR p) {
-		X = p.X;
-		Y = p.Y;
-		T = p.T;
+	public SizeR(SizeR sz) {
+		_cx = sz.getWidth();
+		_cy = sz.getHeight();
 	}
 
-	public static boolean equals(PointR p1, PointR p2) {
-		return (p1.X == p2.X && p1.Y == p2.Y);
+	public double getWidth() {
+
+		return _cx;
+	}
+
+	public void setWidth(double value) {
+		_cx = value;
+	}
+
+	public double getHeight() {
+
+		return _cy;
+	}
+
+	public void setHeight(double value) {
+		_cy = value;
 	}
 
 	public boolean equals(Object obj) {
-		if (obj instanceof PointR) {
-			PointR p = (PointR) obj;
-			return (X == p.X && Y == p.Y);
+		if (obj instanceof SizeR) {
+			SizeR sz = (SizeR) obj;
+			return (getWidth() == sz.getWidth() && getHeight() == sz
+					.getHeight());
 		}
 		return false;
 	}
 
-	public String toString() {
-		return "("+X + "," + Y +")";
-	}
 }

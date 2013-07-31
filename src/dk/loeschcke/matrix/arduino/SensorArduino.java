@@ -1,17 +1,30 @@
 package dk.loeschcke.matrix.arduino;
 
+import gesturefun.NBestList;
+import gesturefun.NDollarParameters;
+import gesturefun.NDollarRecognizer;
+import gesturefun.PointR;
+
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 import marvin.image.MarvinImage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.loeschcke.matrix.image.PointR;
+import dk.loeschcke.matrix.image.PixelFrame;
+
 import dk.loeschcke.matrix.image.ScaleStrategy;
+import dk.loeschcke.matrix.util.FrameListener;
+import dk.loeschcke.matrix.util.Library;
 
 /**
  * SensorArduino reads distances from the Arduino with the Ping sensor, and puts
@@ -23,111 +36,104 @@ import dk.loeschcke.matrix.image.ScaleStrategy;
 public class SensorArduino extends Arduino implements Runnable {
 
 	private static final Logger log = LoggerFactory.getLogger(SensorArduino.class);
-
-	private static final int INPUT_WIDTH = 7;
-	private static final int INPUT_HEIGHT = 7;
 	
-	private final int SCALE = 100;
-	
-	private ScaleStrategy scaleStrategy;
+	static NDollarRecognizer _rec = null;
 
-	public SensorArduino(String portname, ScaleStrategy scaleStrategy) {
+	private PixelFrame pixelFrame = null;
+	private List<FrameListener> listeners = new ArrayList<FrameListener>();
+
+	public SensorArduino(String portname) {
 		super(portname);
-		this.scaleStrategy = scaleStrategy;
-	}
+		
+		String samplesDir = NDollarParameters.getInstance().SamplesDirectory;
 
+		_rec = new NDollarRecognizer();
+
+		// create the set of filenames to read in
+		File currentDir = new File(samplesDir);
+		File[] allXMLFiles = currentDir.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.toLowerCase().endsWith(".xml");
+			}
+		});
+
+		// read them
+		for (int i = 0; i < allXMLFiles.length; ++i) {
+			_rec.LoadGesture(allXMLFiles[i]);
+		}
+	}
+	
 	@Override
 	public void run() {
 		connect();
 		
-		BufferedImage image;
-		MarvinImage marvinImage;
+		Vector<PointR> points = new Vector<PointR>();
 		
-		final int SCALED_WIDTH = INPUT_WIDTH*SCALE;
-		final int SCALED_HEIGHT = INPUT_HEIGHT*SCALE;
-		
-		
-		ArrayList<PointR> points = new ArrayList<PointR>();
-		
+		int i = 0;
+		long start = System.currentTimeMillis();
 		try {
 			
-			int xMaxPrev = -1;
-			int yMaxPrev = -1;
+			PointR pMaxPrev = new PointR(-1,-1);
+			PointR pMax = null;
 			
 			long startTime = System.currentTimeMillis();
-			final long LIMIT = 2000;
+			final long LIMIT = 1200;
 			
-			int[] pixels = new int[INPUT_WIDTH*INPUT_HEIGHT];
 			while (!Thread.interrupted()) {
 
-				int xMax = -1;
-				int yMax = -1;
-				int maxValue = 0;
-				
-				
-				
-				int x = 0;
-				int y = 0;
-				
-				int MIN = 50;
-
 				String line = reader.readLine(); // 1-dim
+				
 				String[] split = line.split(",");
-				if (split.length == INPUT_WIDTH * INPUT_HEIGHT) {
-					// 1 image frame
-					for (int i = 0; i < split.length; i++) {
-						
-						if (x == INPUT_WIDTH-1) {
-							y++;
+//				if (i % 100 == 0) {
+//					long now = System.currentTimeMillis();
+//					System.out.println((now - start) + " ms");
+//					start = now;
+//				}
+//				i++;
+				
+				if (split.length == Library.FRAME_WIDTH * Library.FRAME_HEIGHT) {
+					
+					pixelFrame = new PixelFrame(split, Library.FRAME_WIDTH, Library.FRAME_HEIGHT);
+					
+					pMax = pixelFrame.getMax();
+					
+					if (pointHasChanged(pMax, pMaxPrev)) {
+						if (pMax != null) {
+							points.add(pMax);
+							startTime = System.currentTimeMillis();
+							log.debug(points.get(points.size()-1).toString());
 						}
-						x = i % INPUT_WIDTH;
-						
-						
-						try {
-							pixels[i] = Integer.parseInt(split[i]);
-							if (pixels[i] > MIN && pixels[i] > maxValue) {
-								maxValue = pixels[i];
-								xMax = x;
-								yMax = y;
+					} else {
+						if (!points.isEmpty()) {
+							long time = System.currentTimeMillis();
+							if (time - startTime > LIMIT) {
+								
+								if (points.size() >= 8) { // we need at least 8 points for a gesture
+									log.debug("do recognition test");
+									
+									NBestList result = _rec.Recognize(points, 1);
+									
+									String resultTxt;
+									if (result.getScore() == -1) {
+										log.debug("no fucking gesture!!");
+									} else {
+										log.debug("result: " + result.getName());
+									}
+									resetViews();
+								}
+								System.out.println("reset");
+								startTime = System.currentTimeMillis();
+								points = new Vector<PointR>();
 							}
-							
-						} catch (NumberFormatException e) {
-							pixels[i] = 0;
 						}
 					}
 					
 				}
 				
-				PointR pMax = new PointR(xMax, yMax);
-				PointR pMaxPrev = new PointR(xMaxPrev, yMaxPrev);
+				pMaxPrev = pMax;
 				
-				if ((xMax != xMaxPrev || yMax != yMaxPrev) && xMax != -1 && yMax != -1) {
-					points.add(new PointR(xMax, yMax));
-					startTime = System.currentTimeMillis();
-					System.out.println(points.get(points.size()-1));
-				} else {
-					if (!points.isEmpty()) {
-						long time = System.currentTimeMillis();
-						if (time - startTime > LIMIT) {
-							System.out.println("do recognition test");
-							startTime = System.currentTimeMillis();
-							points = new ArrayList<PointR>();
-						}
-					}
-				}
-				
-				// previous value stays the same
-				// and value < MIN
-				
-				
-				xMaxPrev = xMax;
-				yMaxPrev = yMax;
-				
-				image = scaleStrategy.scale(pixels, INPUT_WIDTH, INPUT_HEIGHT, SCALED_WIDTH, SCALED_HEIGHT);
-				marvinImage = new MarvinImage(image);
-				
-				this.setChanged();
-				this.notifyObservers(marvinImage);
+				updateViews();
 
 			}
 		} catch (IOException e) {
@@ -138,5 +144,38 @@ public class SensorArduino extends Arduino implements Runnable {
 		disconnect();
 	}
 
+	private boolean pointHasChanged(double now, double before) {
+		int a = (int) (now * 10.0 + 0.5);
+		int b = (int) (before * 10.0 + 0.5);
+		//System.out.println(now + " : " + a);
+		return a != b;
+	}
 	
+	private boolean pointHasChanged(PointR now, PointR before) {
+		if (now == null || before == null) {
+			if (now == null && before == null) return false;
+			return true;
+		}
+		return pointHasChanged(now.X, before.X) || pointHasChanged(now.Y, before.Y);
+	}
+	
+	public void addListener(FrameListener listener) {
+		if (!listeners.contains(listener)) {
+			listeners.add(listener);
+		}
+	}
+	
+	public void updateViews() {
+		if (pixelFrame != null) {
+			for (FrameListener frame : listeners) {
+				frame.update(pixelFrame.getPixels(), pixelFrame.getMax());
+			}
+		}
+	}
+	
+	public void resetViews() {
+		for (FrameListener frame : listeners) {
+			frame.reset();
+		}
+	}
 }
