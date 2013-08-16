@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 public class CustomScaleStrategy implements ScaleStrategy {
 
 	@Override
-	public BufferedImage scale(int[] pixels, int w, int h, int w2, int h2) {
+	public int[] scale(int[] pixels, int w, int h, int w2, int h2) {
 		int[] temp = new int[w2*h2] ;
 	    int A, B, C, D, x, y, index, gray ;
 	    float x_ratio = ((float)(w-1))/w2 ;
@@ -35,9 +35,7 @@ public class CustomScaleStrategy implements ScaleStrategy {
 	            temp[offset++] = gray ;                                   
 	        }
 	    }
-	    BufferedImage image = new BufferedImage(w2, h2, BufferedImage.TYPE_BYTE_GRAY);
-        image.getRaster().setPixels(0,0,w2, h2,temp);
-	    return image;
+	    return temp;
 	}
 
 }

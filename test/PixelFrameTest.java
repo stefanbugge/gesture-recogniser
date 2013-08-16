@@ -1,5 +1,5 @@
 import static org.junit.Assert.*;
-import gesturefun.PointR;
+import $N.PointR;
 import junit.framework.Assert;
 
 import org.junit.Test;
