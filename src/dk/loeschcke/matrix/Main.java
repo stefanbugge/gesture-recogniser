@@ -53,7 +53,7 @@ public class Main extends JFrame {
 		
 		final ExecutorService threadPool = Executors.newCachedThreadPool();
 		
-		final SensorArduino sensorArduino = new SensorArduino("COM6");
+		final SensorArduino sensorArduino = new SensorArduino("/dev/tty.usbserial-A600aid6");
 		
 		threadPool.execute(sensorArduino);
 		

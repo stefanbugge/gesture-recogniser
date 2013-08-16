@@ -27,7 +27,7 @@ public class Arduino extends Observable {
 	
 	private static final Logger log = LoggerFactory.getLogger(Arduino.class);
 	
-	private static final int BAUD = 19200;
+	private static final int BAUD = 115200;
 	private static final int TIMEOUT = 2000;
 	
 	private SerialPort serialPort;
