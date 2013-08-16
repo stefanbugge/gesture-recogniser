@@ -1,7 +1,7 @@
 package dk.loeschcke.matrix.image;
 
+import $N.PointR;
 import dk.loeschcke.matrix.helper.PointV;
-import gesturefun.PointR;
 
 public interface ApproximationStrategy {
 	

@@ -1,6 +1,6 @@
 package dk.loeschcke.matrix.image;
 
-import gesturefun.PointR;
+import $N.PointR;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,34 +29,32 @@ public class PixelFrame {
 	
 	private ApproximationStrategy as = new ApproximationStrategy2();
 	
-	public PixelFrame(String[] pixelsStr, int width, int height) {
-		
+	public PixelFrame(int[] data, int width, int height) {
+		pixels = new int[width*height];
 		this.width = width;
 		this.height = height;
-		
-		process(pixelsStr);
+		if (data.length == width * height) {
+			process(data);
+		} else {
+			log.warn("frame skipped: wrong size (" + data.length + ")");
+		}
 	}
 	
-	private void process(String[] pixelsStr) {
-		pixels = new int[width*height];
+	private void process(int[] data) {
+		pixels = data;
 		int x = 0, y = 0;
-		
-		for (int i = 0; i < pixelsStr.length; i++) {
-			
+		for (int i = 0; i < data.length; i++) {
 			if (x == width-1) {
 				y++;
 			}
 			x = i % height;
-			
 			try {
-				pixels[i] = Integer.parseInt(pixelsStr[i]);
 				if (pixels[i] > THRESHOLD_MIN && pixels[i] > maxValue) {
 					maxValue = pixels[i];
 					xMax = x;
 					yMax = y;
 					iMax = i;
 				}
-				
 			} catch (NumberFormatException e) {
 				pixels[i] = 0;
 			}

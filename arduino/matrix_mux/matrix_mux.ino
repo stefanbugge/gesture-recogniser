@@ -55,7 +55,12 @@ void setup() {
   // enable input mux
   pinMode(COM2, INPUT);
   
-  Serial.begin(9600);
+  Serial.begin(115200);
+  
+  // Initial calibration
+  sweep();
+  sweep();
+  calibrate();
 }
 
 void loop() {
@@ -64,11 +69,29 @@ void loop() {
   int value = digitalRead(resetBtnPin);
   if (value == HIGH) {
     // New minimum values are set
-    for (int j = 0; j < CELL_COUNT; j++) {
-      minValues[j] = matrixValues[j];
-    }
+    calibrate();
   }
   
+  sweep();
+    
+  // Map and print to Processing 
+  for (int j = 0; j < CELL_COUNT; j++) {
+    int mappedReading = map(matrixValues[j], minValues[j], 1023, 0, 255);
+    mappedReading = (mappedReading < 0) ? 0 : mappedReading;
+    Serial.print(mappedReading, DEC);
+    if (j < CELL_COUNT-1) Serial.print(",");  
+  }
+  Serial.println();
+  delay(10);
+}
+
+void calibrate() {
+  for (int j = 0; j < CELL_COUNT; j++) {
+    minValues[j] = matrixValues[j];
+  }  
+}
+
+void sweep() {
   int counter = 0;
   for (int row = 0; row < 7; row++) {
  
@@ -86,17 +109,6 @@ void loop() {
       matrixValues[counter] = analogRead(COM2);
       counter++;
     }     
-  }
-    
-  // Map and print to Processing 
-  for (int j = 0; j < CELL_COUNT; j++) {
-    int mappedReading = map(matrixValues[j], minValues[j], 1023, 0, 255);
-    mappedReading = (mappedReading < 0) ? 0 : mappedReading;
-    Serial.print(mappedReading, DEC);
-    if (j < CELL_COUNT-1) Serial.print(",");  
-  }
-  Serial.println();
-  delay(10);   
-   
+  } 
 }
 
