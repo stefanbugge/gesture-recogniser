@@ -47,7 +47,7 @@ public class MatrixHelper {
 		case LEFT: x2--; break;
 		}
 		
-		int value = getValueAt(x2, y2, pixels);
+		double value = getValueAt(x2, y2, pixels);
 		return new PointV(x2, y2, value);
 	}
 

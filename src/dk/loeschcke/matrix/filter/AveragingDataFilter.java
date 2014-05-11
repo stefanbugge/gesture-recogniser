@@ -20,7 +20,7 @@ public class AveragingDataFilter extends AbstractDataFilter implements DataFilte
 			averageData[i] = sum / (frameHistory.size() + 1);
 			sum = 0;
 		}
-		append(averageData);
+		append(data);
 		return averageData;
 	}
 }

@@ -1,18 +1,14 @@
 package dk.loeschcke.matrix.hardware.sensor;
 
+import dk.loeschcke.matrix.util.Library;
+import dk.loeschcke.matrix.util.MockData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Observable;
-import java.util.Observer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import dk.loeschcke.matrix.image.PixelFrame;
-import dk.loeschcke.matrix.util.Library;
-import dk.loeschcke.matrix.util.MockData;
 
 public class MockSensor implements Sensor {
 	

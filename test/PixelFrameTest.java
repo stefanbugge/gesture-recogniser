@@ -1,6 +1,5 @@
 import static org.junit.Assert.*;
-import $N.PointR;
-import junit.framework.Assert;
+import dollarrecognizer.N.PointR;
 
 import org.junit.Test;
 
@@ -42,13 +41,13 @@ public class PixelFrameTest {
 	@Test
 	public void testNeighbourIndeces() {
 //		int x = 1, y = 1;
-//		int index = MatrixHelper.getNeighbourIndex(x, y, Direction.UP, WIDTH);
+//		int index = MatrixHelper.getNeighbourIndex(x, y, DirectionBasedActionResolver.UP, WIDTH);
 //		assertEquals("", 1, index);
-//		index = MatrixHelper.getNeighbourIndex(x, y, Direction.RIGHT, WIDTH);
+//		index = MatrixHelper.getNeighbourIndex(x, y, DirectionBasedActionResolver.RIGHT, WIDTH);
 //		assertEquals("", 9, index);
-//		index = MatrixHelper.getNeighbourIndex(x, y, Direction.DOWN, WIDTH);
+//		index = MatrixHelper.getNeighbourIndex(x, y, DirectionBasedActionResolver.DOWN, WIDTH);
 //		assertEquals("", 15, index);
-//		index = MatrixHelper.getNeighbourIndex(x, y, Direction.LEFT, WIDTH);
+//		index = MatrixHelper.getNeighbourIndex(x, y, DirectionBasedActionResolver.LEFT, WIDTH);
 //		assertEquals("", 7, index);
 	}
 	
@@ -95,7 +94,7 @@ public class PixelFrameTest {
 		PointV y1 		= new PointV(1,0,  6);
 		PointV y2 		= new PointV(1,2,  4);
 		
-		PointR approximation = as.approximate(center, x1, x2, y1, y2);
+		PointV approximation = as.approximate(center, x1, x2, y1, y2);
 		System.out.println(approximation);
 		assertTrue("x should be in the range of +-0.5 from the center x", approximation.X >= center.X-0.5 && center.X+0.5 >= approximation.X);
 		assertTrue("y should be in the range of +-0.5 from the center y", approximation.Y >= center.Y-0.5 && center.Y+0.5 >= approximation.Y);
@@ -144,7 +143,7 @@ public class PixelFrameTest {
 		PointV y1 		= new PointV(1,0,  6);
 		PointV y2 		= new PointV(1,2,  4);
 		
-		PointR approximation = as.approximate(center, x1, x2, y1, y2);
+		PointV approximation = as.approximate(center, x1, x2, y1, y2);
 		//System.out.println(approximation);
 		assertTrue("x should be in the range of +-0.5 from the center x", approximation.X >= center.X-0.5 && center.X+0.5 >= approximation.X);
 		assertTrue("y should be in the range of +-0.5 from the center y", approximation.Y >= center.Y-0.5 && center.Y+0.5 >= approximation.Y);

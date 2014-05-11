@@ -1,7 +1,5 @@
 package dk.loeschcke.matrix.image;
 
-import java.awt.image.BufferedImage;
-
 public class CustomScaleStrategy implements ScaleStrategy {
 
 	@Override

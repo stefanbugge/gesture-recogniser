@@ -1,9 +1,5 @@
 package dk.loeschcke.matrix.image;
 
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-
 public class DefaultScaleStrategy implements ScaleStrategy {
 
 	@Override

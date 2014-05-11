@@ -1,13 +1,12 @@
 package filter;
 
-import static org.junit.Assert.*;
-
-import java.util.List;
-
+import dk.loeschcke.matrix.filter.AbstractDataFilter;
 import org.junit.Before;
 import org.junit.Test;
 
-import dk.loeschcke.matrix.filter.AbstractDataFilter;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class FrameHistoryTest {
 	
